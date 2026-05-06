@@ -1,4 +1,12 @@
-const BASE = import.meta.env.VITE_API_URL || '/api';
+// VITE_API_URL is injected at build time. If it was not available during the
+// build (e.g. the env var was added after the last deploy), fall back to a
+// runtime-safe value: use the current page origin so that relative /api calls
+// still work in development (where the Vite proxy handles them), and avoid
+// silently hitting the wrong host in production.
+const _buildTimeUrl = import.meta.env.VITE_API_URL;
+const BASE = _buildTimeUrl
+  ? _buildTimeUrl.replace(/\/$/, '') // strip any trailing slash
+  : (typeof window !== 'undefined' ? window.location.origin : '') + '/api';
 
 const getToken = () => localStorage.getItem('token');
 
